@@ -7,42 +7,61 @@ import (
 	"time"
 )
 
-func runner(order chan int, numberRunner int, wg *sync.WaitGroup) {
+func runner(order chan int, winner chan bool, group int, numberRunner int, wg *sync.WaitGroup) {
 	for {
 		value := <-order
+		win := <-winner
 		if value == numberRunner {
-			fmt.Println("Runner ", numberRunner, " starting to running...")
+			fmt.Println("Runner", numberRunner, "| group", group, "took the baton...")
 
 			randomInt := (rand.Intn(9) + 1)
 			time.Sleep(time.Duration(randomInt) * time.Second)
 
-			fmt.Println("Runner ", numberRunner, " finished an running")
+			fmt.Println("Runner", numberRunner, "| group", group,"handed over the baton")
 
 			order <- (value + 1)
-
+			if win == false && value == 4 {
+				winner <- true
+				fmt.Println("Team",group, "are the winner of the race")
+			}else {
+				winner <- win
+			}
 			break
 		}
-
+		winner <- win
 		order <- value
 	}
 	defer wg.Done()
 }
 
 func main() {
-	var wg sync.WaitGroup
+	var wg1 sync.WaitGroup
+	var wg2 sync.WaitGroup
 	runnersQuantity := 4
 
-	wg.Add(runnersQuantity)
+	wg1.Add(runnersQuantity)
+	wg2.Add(runnersQuantity)
 
-	order := make(chan int, 1)
-	order <- 1
+	orderG1 := make(chan int, 1)
+	orderG1 <- 1
+
+	orderG2 := make(chan int, 1)
+	orderG2 <- 1
+
+	winner := make(chan bool, 1)
+	winner <- false 
+
+	fmt.Println("Race started:")
 
 	for i := 1; i <= runnersQuantity; i++ {
-		go runner(order, i, &wg)
+		go runner(orderG1, winner, 1, i, &wg1)
+		go runner(orderG2, winner, 2, i, &wg2)
 	}
 
-	wg.Wait()
 
-	fmt.Println("Running is finished")
+	wg1.Wait()
+	wg2.Wait()
+
+	fmt.Println("Race finished.")
 
 }
