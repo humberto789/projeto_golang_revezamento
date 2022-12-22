@@ -2,7 +2,7 @@
 
 Passos para inicializar o programa
 
-1. Instalar o go no seu sistema operacional (Se já tiver instalado pule essa etapa)
+1. Instalar o go no seu sistema operacional (se já tiver instalado pule essa etapa)
 
 2. Abrir o terminal e entrar no diretorio desse projeto
 
